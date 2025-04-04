@@ -16,17 +16,17 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
 
 export default function Home() {
   return (
-    <main className="w-full">
+    <main className="w-full h-[92vh]">
       <AppNavbar />
-      <div className="flex w-full">
-        <Card className="w-1/2">
+      <div className="flex w-full h-full">
+        <Card className="w-1/6 rounded-none drop-shadow-none shadow-none justify-between">
           <CardHeader>
             <CardTitle>Experiments</CardTitle>
             <CardDescription>
               History of Prompt Engineering experiments.
             </CardDescription>
           </CardHeader>
-          <CardContent className="flex flex-col gap-5">
+          <CardContent className="flex flex-col gap-5 h-full">
             <div className="flex justify-between items-center">
               <div>
                 <div className="font-bold">Support AI</div>
@@ -64,7 +64,7 @@ export default function Home() {
               </div>
             </div>
           </CardContent>
-          <CardFooter>
+          <CardFooter className="">
             <CardAction>
               <Button>Create New</Button>
             </CardAction>
@@ -115,14 +115,14 @@ export default function Home() {
             </CardAction>
           </CardFooter>
         </Card> */}
-        <Card className="w-1/2">
+        <Card className="w-5/6 rounded-none drop-shadow-none shadow-none justify-between">
           <CardHeader>
             <CardTitle>Support AI</CardTitle>
             <CardDescription>
               Configure your AI agent to fine-tune the responses.
             </CardDescription>
           </CardHeader>
-          <CardContent>
+          <CardContent className="h-full">
             <form className="flex flex-col gap-5">
               <div className="flex flex-col items-start space-y-2">
                 <Label htmlFor="instruction">Instruction Context</Label>
