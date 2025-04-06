@@ -1,3 +1,4 @@
+"use client";
 import AppNavbar from "@/aicomponents/app-navbar";
 import { Button } from "@/components/ui/button";
 import {
@@ -12,9 +13,15 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronRight, SendHorizonalIcon } from "lucide-react";
+import { useState } from "react";
+import Markdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 
 export default function Home() {
+  const [chat, setChat] = useState([
+    { role: "assistant", content: "Hello, How can I help you" },
+  ]);
   return (
     <main className="w-full h-[92vh]">
       <AppNavbar />
@@ -115,7 +122,7 @@ export default function Home() {
             </CardAction>
           </CardFooter>
         </Card> */}
-        <Card className="w-5/6 rounded-none drop-shadow-none shadow-none justify-between">
+        <Card className="w-2/6 rounded-none drop-shadow-none shadow-none justify-between">
           <CardHeader>
             <CardTitle>Support AI</CardTitle>
             <CardDescription>
@@ -161,6 +168,84 @@ export default function Home() {
               Last Updated <br />
               Fri Apr 04 2025
             </div>
+          </CardFooter>
+        </Card>
+        <Card className="w-3/6 max-w-4xl h-full mx-auto rounded-none drop-shadow-none shadow-none flex flex-col justify-between">
+          <CardHeader>
+            <CardTitle>Support AI</CardTitle>
+            <CardDescription>
+              Experiment your AI agent to test the responses.
+            </CardDescription>
+          </CardHeader>
+
+          <CardContent className="flex-1 w-full overflow-y-auto">
+            <div className="flex flex-col gap-2">
+              {chat.map((c, i) => {
+                if (["assistant", "user"].includes(c.role)) {
+                  return (
+                    <div
+                      className={`border-2 rounded-xl px-4 py-1 max-w-[80%] break-words ${
+                        c.role === "user"
+                          ? "self-end bg-blue-100"
+                          : "self-start bg-gray-200"
+                      }`}
+                      key={i}
+                    >
+                      <Markdown remarkPlugins={[remarkGfm]}>
+                        {c.content}
+                      </Markdown>
+                    </div>
+                  );
+                }
+              })}
+            </div>
+          </CardContent>
+
+          <CardFooter className="flex w-full">
+            <form
+              className="w-full flex"
+              onSubmit={(e) => {
+                e.preventDefault();
+                const formData = new FormData(e.currentTarget);
+                const prompt = formData.get("prompt-exp-input");
+                const localchat = [...chat];
+
+                if (typeof prompt === "string" && prompt.trim() !== "") {
+                  const userPrompt = { role: "user", content: prompt };
+                  localchat.push(userPrompt);
+                  fetch("http://localhost:8000/api/v1/chat/", {
+                    method: "POST",
+                    headers: {
+                      "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({
+                      messages: localchat,
+                    }),
+                  })
+                    .then(async (d) => {
+                      const data = await d.json();
+                      localchat.push({
+                        role: "assistant",
+                        content: data.response,
+                      });
+                      setChat([...localchat]);
+                    })
+                    .catch((e) => console.log(e));
+                  e.currentTarget.reset(); // Clear the input field
+                }
+              }}
+            >
+              <Input
+                type="text"
+                placeholder="prompt..."
+                className="w-full rounded-r-none"
+                id="prompt-exp-input"
+                name="prompt-exp-input"
+              />
+              <Button type="submit" className="rounded-l-none">
+                <SendHorizonalIcon />
+              </Button>
+            </form>
           </CardFooter>
         </Card>
       </div>
