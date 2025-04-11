@@ -1,168 +1,60 @@
+"use client";
 import AppNavbar from "@/aicomponents/app-navbar";
-import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardAction,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import ChatUI from "@/aicomponents/ChatUI";
+
+import EditExperiments from "@/aicomponents/EditExperiments";
+import Experiments from "@/aicomponents/experiments";
+import { useEffect, useState } from "react";
+const API_BASE = process.env.NEXT_PUBLIC_API_BASE || "http://127.0.0.1:8000";
 
 export default function Home() {
-  return (
-    <main className="w-full">
-      <AppNavbar />
-      <div className="flex w-full">
-        <Card className="w-1/2">
-          <CardHeader>
-            <CardTitle>Experiments</CardTitle>
-            <CardDescription>
-              History of Prompt Engineering experiments.
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="flex flex-col gap-5">
-            <div className="flex justify-between items-center">
-              <div>
-                <div className="font-bold">Support AI</div>
-                <div className="text-xs">{Date().split("", 15)}</div>
-              </div>
-              <div>
-                <ChevronRight />
-              </div>
-            </div>
-            <div className="flex justify-between items-center">
-              <div>
-                <div className="font-bold">Support AI</div>
-                <div className="text-xs">{Date().split("", 15)}</div>
-              </div>
-              <div>
-                <ChevronRight />
-              </div>
-            </div>
-            <div className="flex justify-between items-center">
-              <div>
-                <div className="font-bold">Support AI</div>
-                <div className="text-xs">{Date().split("", 15)}</div>
-              </div>
-              <div>
-                <ChevronRight />
-              </div>
-            </div>
-            <div className="flex justify-between items-center">
-              <div>
-                <div className="font-bold">Support AI</div>
-                <div className="text-xs">{Date().split("", 15)}</div>
-              </div>
-              <div>
-                <ChevronRight />
-              </div>
-            </div>
-          </CardContent>
-          <CardFooter>
-            <CardAction>
-              <Button>Create New</Button>
-            </CardAction>
-          </CardFooter>
-        </Card>
+  const [agentContext, setAgentContext] = useState<AgentContext>();
+  const [agents, setAgents] = useState<AgentContext[]>([]);
+  const [loading, setLoading] = useState<boolean>(false);
 
-        {/* <Card className="w-1/2">
-          <CardHeader>
-            <CardTitle>Create AI Agent</CardTitle>
-            <CardDescription>
-              Configure your AI agent to fine-tune the responses.
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <form className="flex flex-col gap-5">
-              <div className="flex flex-col items-start space-y-2">
-                <Label htmlFor="instruction">Instruction Context</Label>
-                <Textarea
-                  id="instruction"
-                  placeholder="You are a helpful assistant. Always provide concise, professional answers."
-                />
-              </div>
-              <div className="flex flex-col items-start space-y-2">
-                <Label htmlFor="prompt">Prompt Context</Label>
-                <Textarea
-                  id="prompt"
-                  placeholder="How do I reset my password?"
-                />
-              </div>
-              <div className="flex flex-col items-start space-y-2">
-                <Label htmlFor="expect">Expected Output</Label>
-                <Textarea id="expect" placeholder="Settings -> Profile ..." />
-              </div>
-              <div className="flex flex-col items-start space-y-2">
-                <Label htmlFor="outformat">Output Format</Label>
-                <Textarea
-                  id="outformat"
-                  placeholder={
-                    "[Introduction]\n[Step-by-step Instructions]\n[Additional Notes]"
-                  }
-                />
-              </div>
-            </form>
-          </CardContent>
-          <CardFooter>
-            <CardAction>
-              <Button>Create/Edit</Button>
-            </CardAction>
-          </CardFooter>
-        </Card> */}
-        <Card className="w-1/2">
-          <CardHeader>
-            <CardTitle>Support AI</CardTitle>
-            <CardDescription>
-              Configure your AI agent to fine-tune the responses.
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <form className="flex flex-col gap-5">
-              <div className="flex flex-col items-start space-y-2">
-                <Label htmlFor="instruction">Instruction Context</Label>
-                <Textarea
-                  id="instruction"
-                  placeholder="You are a helpful assistant. Always provide concise, professional answers."
-                />
-              </div>
-              <div className="flex flex-col items-start space-y-2">
-                <Label htmlFor="prompt">Prompt Context</Label>
-                <Textarea
-                  id="prompt"
-                  placeholder="How do I reset my password?"
-                />
-              </div>
-              <div className="flex flex-col items-start space-y-2">
-                <Label htmlFor="expect">Expected Output</Label>
-                <Textarea id="expect" placeholder="Settings -> Profile ..." />
-              </div>
-              <div className="flex flex-col items-start space-y-2">
-                <Label htmlFor="outformat">Output Format</Label>
-                <Textarea
-                  id="outformat"
-                  placeholder={
-                    "[Introduction]\n[Step-by-step Instructions]\n[Additional Notes]"
-                  }
-                />
-              </div>
-            </form>
-          </CardContent>
-          <CardFooter className="flex justify-between">
-            <CardAction>
-              <Button>Create/Edit</Button>
-            </CardAction>
-            <div className="text-xs text-right">
-              Last Updated <br />
-              Fri Apr 04 2025
-            </div>
-          </CardFooter>
-        </Card>
+  useEffect(() => {
+    const initChat = async () => {
+      setLoading(true);
+      try {
+        const res = await fetch(
+          `${API_BASE}/api/v1/agents?s=id,agentName,description,updatedDate`
+        );
+        const data = await res.json();
+        console.log(data);
+        if (data?.length) {
+          setAgents(data);
+        } else {
+          console.error("No agents found");
+        }
+      } catch (error) {
+        console.error("Failed to load agent context:", error);
+      }
+      setLoading(false);
+    };
+
+    initChat();
+  }, []);
+  return (
+    <main className="w-full h-[92vh]">
+      <AppNavbar />
+      <div className="flex w-full h-full">
+        <Experiments
+          setAgentContext={setAgentContext}
+          agents={agents}
+          className="w-1/6"
+        />
+
+        <EditExperiments
+          loading={loading}
+          agentContext={agentContext}
+          className="w-2/6"
+        />
+
+        <ChatUI
+          loading={loading}
+          agentContext={agentContext}
+          className="w-3/6"
+        />
       </div>
     </main>
   );
