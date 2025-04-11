@@ -14,6 +14,7 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
+import Image from "next/image";
 
 // Menu items.
 const items = [
@@ -59,9 +60,15 @@ export function AppSidebar() {
     <Sidebar collapsible="icon">
       <SidebarHeader>
         <SidebarMenuButton asChild>
-          <a href="#">
-            <div className="text-lg font-bold">AI</div>
-            <div className="text-lg font-bold">Studio</div>
+          <a href="#" className="h-14">
+            <Image
+              className="w-8 h-8 object-contain "
+              src="/assets/logo/logoDark.svg"
+              alt="Astraph.AI"
+              width={100}
+              height={100}
+            />
+            <div className="text-lg font-bold">Astraph.AI</div>
           </a>
         </SidebarMenuButton>
       </SidebarHeader>
