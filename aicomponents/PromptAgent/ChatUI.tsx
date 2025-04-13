@@ -92,7 +92,7 @@ function ChatUI({
 
   return (
     <Card
-      className={`w-full max-w-4xl h-full mx-auto flex flex-col justify-between rounded-none shadow-none ${className}`}
+      className={`w-full max-w-6xl h-full mx-auto flex flex-col justify-between rounded-none shadow-none ${className}`}
     >
       {loading ? (
         <ChatUISkeleton />

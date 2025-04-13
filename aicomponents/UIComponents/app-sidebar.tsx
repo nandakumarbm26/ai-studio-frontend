@@ -61,14 +61,23 @@ export function AppSidebar() {
       <SidebarHeader>
         <SidebarMenuButton asChild>
           <a href="#" className="h-14">
-            <Image
-              className="w-8 h-8 object-contain "
-              src="/assets/logo/logoDark.svg"
-              alt="Astraph.AI"
-              width={100}
-              height={100}
-            />
-            <div className="text-lg font-bold">Astraph.AI</div>
+            {open ? (
+              <Image
+                className="w-full h-8 object-left object-contain "
+                src="/assets/logo/astraph.png"
+                alt="Astraph.AI"
+                width={400}
+                height={100}
+              />
+            ) : (
+              <Image
+                className="w-8 h-8 object-contain "
+                src="/assets/logo/astraphLogo.png"
+                alt="Astraph.AI"
+                width={100}
+                height={100}
+              />
+            )}
           </a>
         </SidebarMenuButton>
       </SidebarHeader>

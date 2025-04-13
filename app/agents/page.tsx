@@ -36,6 +36,7 @@ export default function Home() {
   }, []);
   return (
     <main className="w-full h-[92vh]">
+      <AppNavbar />
       <div className="flex w-full h-full">
         <Experiments
           setAgentContext={setAgentContext}
