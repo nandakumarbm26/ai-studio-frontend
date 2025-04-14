@@ -46,7 +46,12 @@ export async function loginUser(emailOrUsername: string, password: string) {
   return apiClient<
     { username: string; password: string },
     { access_token: string; token_type: string }
-  >("/token", "POST", { username: emailOrUsername, password }, "form");
+  >(
+    "/api/v1/auth/token",
+    "POST",
+    { username: emailOrUsername, password },
+    "form"
+  );
 }
 
 export async function signUpUser(data: {
@@ -67,5 +72,5 @@ export async function signUpUser(data: {
       phone: string;
       email: string;
     }
-  >("/signup", "POST", data, "json");
+  >("/api/v1/auth/signup", "POST", data, "json");
 }

@@ -1,3 +1,4 @@
+"use client";
 import * as React from "react";
 import { cva, type VariantProps } from "class-variance-authority";
 
@@ -91,4 +92,64 @@ function AlertPops({
   );
 }
 
-export { Alert, AlertTitle, AlertDescription, AlertPops };
+export type AlertType = {
+  id: number;
+  type: VariantProps<typeof alertVariants>["variant"];
+  title: string;
+  description: string;
+};
+
+let nextId = 0;
+
+const AlertContext = React.createContext<{
+  addAlert: (alert: Omit<AlertType, "id">) => void;
+} | null>(null);
+
+const AlertProvider: React.FC<{ children: React.ReactNode }> = ({
+  children,
+}) => {
+  const [alerts, setAlerts] = React.useState<AlertType[]>([]);
+
+  const addAlert = (alert: Omit<AlertType, "id">) => {
+    const id = nextId++;
+    setAlerts((prev) => [...prev, { id, ...alert }]);
+    setTimeout(() => {
+      setAlerts((prev) => prev.filter((a) => a.id !== id));
+    }, 3000);
+  };
+
+  return (
+    <AlertContext.Provider value={{ addAlert }}>
+      {children}
+      <div className="fixed top-10 right-5 z-50 space-y-2 w-3/4 md:w-[30%]">
+        {alerts.map((alert) => (
+          <Alert
+            key={alert.id}
+            variant={alert.type}
+            className={cn(alertVariants({ variant: alert.type }))}
+          >
+            <AlertTitle>{alert.title}</AlertTitle>
+            <AlertDescription>{alert.description}</AlertDescription>
+          </Alert>
+        ))}
+      </div>
+    </AlertContext.Provider>
+  );
+};
+
+const useAlert = () => {
+  const context = React.useContext(AlertContext);
+  if (!context)
+    throw new Error("useAlert must be used within an AlertProvider");
+  return context;
+};
+
+export {
+  Alert,
+  AlertTitle,
+  AlertDescription,
+  AlertPops,
+  useAlert,
+  AlertProvider,
+  AlertContext,
+};

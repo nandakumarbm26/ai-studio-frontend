@@ -1,43 +1,42 @@
 // Login.tsx
 "use client";
-import { useState } from "react";
+import { ReactElement, useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import {
-  Alert,
-  AlertDescription,
-  AlertPops,
-  AlertTitle,
-} from "@/components/ui/alert";
+import { useAlert } from "@/components/ui/alert";
 import { loginUser, signUpUser } from "@/lib/api";
 import { Label } from "@/components/ui/label";
 import Link from "next/link";
 import { Separator } from "@/components/ui/separator";
+import { useRouter } from "next/navigation";
 
 function Login() {
+  const router = useRouter();
   const [emailOrUsername, setEmailOrUsername] = useState("");
   const [password, setPassword] = useState("");
-  const [error, setError] = useState("");
-
+  const { addAlert } = useAlert();
   const handleLogin = async () => {
     try {
       const res = await loginUser(emailOrUsername, password);
       localStorage.setItem("token", res.access_token);
-      setError("");
-      // Navigate to dashboard or home
+
+      addAlert({
+        type: "default", // "default", "warning", "success", etc.
+        title: "Login Successful",
+        description: "Redirecting to dashboard.",
+      });
+      router.push("/agents");
     } catch (err: any) {
-      setError(err.message);
+      addAlert({
+        type: "destructive", // "default", "warning", "success", etc.
+        title: "Something went wrong.",
+        description: err.message,
+      });
     }
   };
 
   return (
     <div className="max-w-md w-full mx-auto space-y-4 flex flex-col justify-center items-center">
-      {error && (
-        <AlertPops variant="destructive">
-          <AlertTitle>Error</AlertTitle>
-          <AlertDescription>{error}</AlertDescription>
-        </AlertPops>
-      )}
       <div className="w-full max-w-[300px]">
         <h1 className="font-bold text-xl">Login to Astraph.AI</h1>
         <h2 className="text-sm">unleashing capabilities of AI.</h2>
@@ -80,6 +79,8 @@ function Login() {
 }
 
 function SignUp() {
+  const { addAlert } = useAlert();
+
   const [form, setForm] = useState({
     fname: "",
     lname: "",
@@ -89,7 +90,6 @@ function SignUp() {
     password: "",
     confirmPassword: "",
   });
-  const [error, setError] = useState("");
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -97,27 +97,33 @@ function SignUp() {
 
   const handleSignUp = async () => {
     if (form.password !== form.confirmPassword) {
-      setError("Passwords do not match");
+      addAlert({
+        type: "destructive", // "default", "warning", "success", etc.
+        title: "Passwords do not match",
+        description: "Please make sure Passwords are same.",
+      });
       return;
     }
     try {
       const { confirmPassword, ...signUpData } = form;
       await signUpUser(signUpData);
-      setError("");
-      // Redirect or show success
+      addAlert({
+        type: "default", // "default", "warning", "success", etc.
+        title: "SignUp Successful",
+        description: "Redirecting to dashboard.",
+      });
     } catch (err: any) {
-      setError(err.message);
+      addAlert({
+        type: "destructive", // "default", "warning", "success", etc.
+        title: "Something went wrong.",
+        description: err.message,
+      });
+      console.log(err);
     }
   };
 
   return (
     <div className="max-w-md w-full mx-auto space-y-4 flex flex-col justify-center items-center">
-      {error && (
-        <AlertPops variant="destructive">
-          <AlertTitle>Error</AlertTitle>
-          <AlertDescription>{error}</AlertDescription>
-        </AlertPops>
-      )}
       <div className="w-full max-w-[300px]">
         <h1 className="font-bold text-xl">Create an account.</h1>
         <h2 className="text-sm">unleash capabilities of AI.</h2>
@@ -213,4 +219,26 @@ function SignUp() {
   );
 }
 
-export { Login, SignUp };
+const AuthProvider = ({ children }: { children: ReactElement }) => {
+  const router = useRouter();
+  if (!localStorage.getItem("token")) {
+    router.push("/auth/login");
+  }
+  return <>{children}</>;
+};
+
+const LogoutProvider = ({ children }: { children: ReactElement }) => {
+  const router = useRouter();
+  return (
+    <div
+      onClick={() => {
+        localStorage.removeItem("token");
+        router.push("/auth/login");
+      }}
+    >
+      {children}
+    </div>
+  );
+};
+
+export { Login, SignUp, AuthProvider, LogoutProvider };

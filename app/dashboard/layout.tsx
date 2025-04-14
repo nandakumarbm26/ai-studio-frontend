@@ -1,9 +1,8 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
-import "./globals.css";
+import "../globals.css";
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/aicomponents/UIComponents/app-sidebar";
-import AppNavbar from "@/aicomponents/UIComponents/app-navbar";
 import { AlertProvider } from "@/components/ui/alert";
 
 const geistSans = Geist({
@@ -29,11 +28,15 @@ export default function RootLayout({
   return (
     <html>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased overflow-x-clip hide-scrollbar`}
+        className={`${geistSans.variable} ${geistMono.variable} antialiased `}
       >
-        <main className="w-[100vw]">
-          <AlertProvider>{children}</AlertProvider>
-        </main>
+        <AlertProvider>
+          <SidebarProvider>
+            <AppSidebar />
+
+            <main className="w-[100vw]">{children}</main>
+          </SidebarProvider>
+        </AlertProvider>
       </body>
     </html>
   );
