@@ -26,9 +26,9 @@ export default function RootLayout({
   return (
     <html>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased overflow-x-clip hide-scrollbar`}
+        className={`${geistSans.variable} ${geistMono.variable} antialiased `}
       >
-        <main className="w-[100vw]">
+        <main className="w-[100vw] overflow-x-clip hide-scrollbar">
           <AlertProvider>{children}</AlertProvider>
         </main>
       </body>
