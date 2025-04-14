@@ -14,7 +14,7 @@ import { Label } from "@radix-ui/react-label";
 import { Edit } from "lucide-react";
 import { Dispatch, SetStateAction, useEffect, useState } from "react";
 import { Separator } from "@/components/ui/separator";
-import { InfoTooltip } from "./InfoToolTip";
+import { InfoTooltip } from "../General/InfoToolTip";
 import { Input } from "@/components/ui/input";
 import EditExperimentsSkeleton from "./LoadingSkeletons/EditExperimentsSkeleton";
 
