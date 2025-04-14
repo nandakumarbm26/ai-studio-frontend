@@ -28,15 +28,16 @@ export default function RootLayout({
   return (
     <html>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased `}
+        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <AlertProvider>
-          <SidebarProvider>
-            <AppSidebar />
-
-            <main className="w-[100vw]">{children}</main>
-          </SidebarProvider>
-        </AlertProvider>
+        <main className="w-[100vw]">
+          <AlertProvider>
+            <SidebarProvider>
+              <AppSidebar />
+              {children}
+            </SidebarProvider>
+          </AlertProvider>
+        </main>
       </body>
     </html>
   );
