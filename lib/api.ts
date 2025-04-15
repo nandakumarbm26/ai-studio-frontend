@@ -1,43 +1,45 @@
-// api.ts
-import axios, { AxiosRequestConfig, Method } from "axios";
+import axios, { AxiosHeaders, Method } from "axios";
 
-export const BASE_URL = "http://localhost:8000";
-
-const axiosInstance = axios.create({
-  baseURL: BASE_URL,
-});
+const PROXY_API = "/api/proxy"; // This is your Next.js API route
 
 export async function apiClient<TInput = any, TOutput = any>(
   path: string,
   method: Method = "GET",
   data?: TInput,
-  contentType: "json" | "form" = "json"
+  contentType: "json" | "form" = "json",
+  headers?: AxiosHeaders
 ): Promise<TOutput> {
-  const config: AxiosRequestConfig = {
-    url: path,
-    method,
-    headers: {},
+  const finalHeaders: Record<string, string> = {
+    ...(headers || {}),
   };
+
+  let body: any = null;
 
   if (data) {
     if (contentType === "json") {
-      config.headers!["Content-Type"] = "application/json";
-      config.data = data;
+      finalHeaders["Content-Type"] = "application/json";
+      body = data;
     } else if (contentType === "form") {
-      config.headers!["Content-Type"] = "application/x-www-form-urlencoded";
+      finalHeaders["Content-Type"] = "application/x-www-form-urlencoded";
       const formData = new URLSearchParams();
       Object.entries(data as Record<string, string>).forEach(([key, value]) => {
         formData.append(key, value);
       });
-      config.data = formData;
+      body = Object.fromEntries(formData); // Send form data as string
     }
   }
 
   try {
-    const res = await axiosInstance.request<TOutput>(config);
+    const res = await axios.post<TOutput>(PROXY_API, {
+      url: path,
+      method,
+      headers: finalHeaders,
+      body,
+    });
+
     return res.data;
   } catch (err: any) {
-    const message = err.response?.data?.detail || err.message || "API Error";
+    const message = err.response?.data?.error || err.message || "API Error";
     throw new Error(message);
   }
 }

@@ -17,6 +17,8 @@ import { Separator } from "@/components/ui/separator";
 import { InfoTooltip } from "../General/InfoToolTip";
 import { Input } from "@/components/ui/input";
 import EditExperimentsSkeleton from "./LoadingSkeletons/EditExperimentsSkeleton";
+import { apiClient } from "@/lib/api";
+import { AxiosHeaders } from "axios";
 
 function CreatePromptTrainer({
   index = null,
@@ -193,7 +195,6 @@ function EditExperiments({
                       e.currentTarget.name,
                       e.target.value
                     );
-                    console.log(agentConfiguration);
                   }}
                   id="agent-description"
                   name="description"
@@ -307,7 +308,7 @@ function EditExperiments({
             <CardAction>
               <Button
                 onClick={() => {
-                  const reqHeaders = new Headers();
+                  const reqHeaders = new AxiosHeaders();
                   reqHeaders.append("Content-Type", "application/json");
 
                   const body = JSON.stringify({
@@ -318,15 +319,13 @@ function EditExperiments({
                     trainingPrompts: userPromptTrainers,
                   });
 
-                  fetch("http://127.0.0.1:8000/api/v1/agents", {
-                    method: "POST",
-                    headers: reqHeaders,
-                    body,
-                    redirect: "follow",
-                  })
-                    .then((response) => response.text())
-                    .then((result) => console.log(result))
-                    .catch((error) => console.error(error));
+                  apiClient(
+                    "/api/v1/agents", // path
+                    "POST", // method
+                    body, // data
+                    "json", // contentType
+                    reqHeaders // headers
+                  ).catch((error) => console.error(error));
                 }}
               >
                 Edit

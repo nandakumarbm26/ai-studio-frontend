@@ -5,7 +5,7 @@ import ChatUI from "@/aicomponents/PromptAgent/ChatUI";
 import EditExperiments from "@/aicomponents/PromptAgent/EditExperiments";
 import Experiments from "@/aicomponents/PromptAgent/experiments";
 import { useEffect, useState } from "react";
-const API_BASE = process.env.NEXT_PUBLIC_API_BASE || "http://127.0.0.1:8000";
+import { apiClient } from "@/lib/api";
 
 export default function Home() {
   const [agentContext, setAgentContext] = useState<AgentContext>();
@@ -16,11 +16,9 @@ export default function Home() {
     const initChat = async () => {
       setLoading(true);
       try {
-        const res = await fetch(
-          `${API_BASE}/api/v1/agents?s=id,agentName,description,updatedDate`
+        const data = await apiClient(
+          `/api/v1/agents?s=id,agentName,description,updatedDate`
         );
-        const data = await res.json();
-        console.log(data);
         if (data?.length) {
           setAgents(data);
         } else {

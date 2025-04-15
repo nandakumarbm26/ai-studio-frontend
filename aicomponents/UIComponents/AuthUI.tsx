@@ -25,7 +25,7 @@ function Login() {
         title: "Login Successful",
         description: "Redirecting to dashboard.",
       });
-      router.push("/agents");
+      router.push("/dashboard/agents");
     } catch (err: any) {
       addAlert({
         type: "destructive", // "default", "warning", "success", etc.
@@ -80,7 +80,7 @@ function Login() {
 
 function SignUp() {
   const { addAlert } = useAlert();
-
+  const router = useRouter();
   const [form, setForm] = useState({
     fname: "",
     lname: "",
@@ -112,13 +112,14 @@ function SignUp() {
         title: "SignUp Successful",
         description: "Redirecting to dashboard.",
       });
+      router.push("/dashboard/agents");
     } catch (err: any) {
       addAlert({
         type: "destructive", // "default", "warning", "success", etc.
         title: "Something went wrong.",
         description: err.message,
       });
-      console.log(err);
+
     }
   };
 
