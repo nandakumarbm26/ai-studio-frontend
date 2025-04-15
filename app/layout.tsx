@@ -73,14 +73,16 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html>
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased `}
-      >
-        <main className="w-[100vw] overflow-x-clip hide-scrollbar">
-          <AlertProvider>{children}</AlertProvider>
-        </main>
-      </body>
-    </html>
+    <AlertProvider>
+      <html>
+        <body
+          className={`${geistSans.variable} ${geistMono.variable} antialiased `}
+        >
+          <main className="w-[100vw] overflow-x-clip hide-scrollbar">
+            {children}
+          </main>
+        </body>
+      </html>
+    </AlertProvider>
   );
 }

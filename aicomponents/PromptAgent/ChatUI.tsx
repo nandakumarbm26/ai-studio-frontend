@@ -15,8 +15,8 @@ import Markdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 
 import { Skeleton } from "@/components/ui/skeleton";
-
-const API_BASE = process.env.NEXT_PUBLIC_API_BASE || "http://127.0.0.1:8000";
+import { apiClient } from "@/lib/api";
+import { AxiosHeaders } from "axios";
 
 function ChatUISkeleton() {
   return (
@@ -73,16 +73,20 @@ function ChatUI({
 
     e.currentTarget.reset(); // Clear input
     try {
-      const res = await fetch("http://localhost:8000/api/v1/chat/", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
+      const reqHeaders = new AxiosHeaders();
+      reqHeaders.set("Content-Type", "application/json");
+      const data = await apiClient(
+        "/api/v1/chat/",
+        "POST",
+
+        {
           messages: [...newChat],
           filters: { id: agentContext?.id },
-        }),
-      });
+        },
+        "json",
+        reqHeaders
+      );
 
-      const data = await res.json();
       setChat([...newChat, { role: "assistant", content: data.response }]);
     } catch (err) {
       console.error("Chat request failed:", err);

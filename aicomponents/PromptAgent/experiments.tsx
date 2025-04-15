@@ -8,10 +8,36 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { apiClient } from "@/lib/api";
 import { ChevronRight } from "lucide-react";
-const API_BASE = process.env.NEXT_PUBLIC_API_BASE || "http://127.0.0.1:8000";
+import { useEffect } from "react";
 
 function Experiments({ className, agents, setAgentContext }: ExperimentsProps) {
+  useEffect(() => {
+    handleAgentChange(1);
+  }, []);
+  const handleAgentChange = async (id: number) => {
+    try {
+      const data = await apiClient(`/api/v1/agents?id=${id}`);
+      if (data?.length) {
+        const chatContext = data[0];
+
+        const trainerPrompts: Message[] = JSON.parse(
+          chatContext.trainingPrompts
+        );
+        const agentconfig: AgentContext = {
+          ...chatContext,
+          promptTrainers: trainerPrompts,
+        };
+
+        setAgentContext(agentconfig);
+      } else {
+        console.error("No agent found");
+      }
+    } catch (error) {
+      console.error("Failed to load agent context:", error);
+    }
+  };
   return (
     <Card
       className={
@@ -29,35 +55,9 @@ function Experiments({ className, agents, setAgentContext }: ExperimentsProps) {
         {agents.map((d: any, i: number) => {
           return (
             <div
-              className="flex items-center justify-between p-2 rounded-sm hover:bg-gray-100 group transition-all duration-200"
+              className="flex items-center justify-between p-2 rounded-sm hover:bg-gray-100 group transition-all duration-200 cursor-pointer"
               key={i}
-              onClick={async () => {
-                console.log(d.id);
-                try {
-                  const res = await fetch(
-                    `${API_BASE}/api/v1/agents?id=${d.id}`
-                  );
-                  const data = await res.json();
-                  if (data?.length) {
-                    const chatContext = data[0];
-
-                    const trainerPrompts: Message[] = JSON.parse(
-                      chatContext.trainingPrompts
-                    );
-                    const agentconfig: AgentContext = {
-                      ...chatContext,
-                      promptTrainers: trainerPrompts,
-                    };
-
-                    setAgentContext(agentconfig);
-                    console.log(agentconfig);
-                  } else {
-                    console.error("No agent found");
-                  }
-                } catch (error) {
-                  console.error("Failed to load agent context:", error);
-                }
-              }}
+              onClick={() => handleAgentChange(d.id)}
             >
               <div>
                 <div className="font-semibold">{d.agentName}</div>
