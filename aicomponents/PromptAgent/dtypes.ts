@@ -10,6 +10,7 @@ type AgentConfiguration = {
   template: string;
   agentName: string;
   description: string;
+  id?: number | null;
 };
 type PromptTrainerProps = {
   index?: number | null;

@@ -30,12 +30,20 @@ export async function apiClient<TInput = any, TOutput = any>(
   }
 
   try {
-    const res = await axios.post<TOutput>(PROXY_API, {
-      url: path,
-      method,
-      headers: finalHeaders,
-      body,
-    });
+    let res = undefined;
+    if (path.startsWith("/api/v1")) {
+      res = await axios.post<TOutput>(PROXY_API, {
+        url: path,
+        method,
+        headers: finalHeaders,
+        body,
+      });
+    } else {
+      res = await axios.post<TOutput>(path, {
+        headers: finalHeaders,
+        body,
+      });
+    }
 
     return res.data;
   } catch (err: any) {

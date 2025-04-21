@@ -4,7 +4,7 @@ const API_URL = process.env.NEXT_PUBLIC_ASTRAPH_AI_API;
 
 export async function POST(request: Request) {
   const { url, method, headers, body } = await request.json();
-
+  console.log({ url, method, headers, body });
   if (!url) {
     return NextResponse.json({ error: "Missing target URL" }, { status: 400 });
   }
@@ -31,7 +31,7 @@ export async function POST(request: Request) {
       fetchOptions.body = formData.toString(); // Pass serialized string for form data
     } else {
       // For JSON data, directly stringify it
-      fetchOptions.body = JSON.stringify(body);
+      fetchOptions.body = body;
     }
   }
 
