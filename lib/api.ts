@@ -1,4 +1,5 @@
 import axios, { AxiosHeaders, Method } from "axios";
+import { AUTH_LOGIN } from "./queries";
 
 const PROXY_API = "/api/proxy"; // This is your Next.js API route
 
@@ -18,7 +19,7 @@ export async function apiClient<TInput = any, TOutput = any>(
   if (data) {
     if (contentType === "json") {
       finalHeaders["Content-Type"] = "application/json";
-      body = data;
+      body = JSON.stringify(data);
     } else if (contentType === "form") {
       finalHeaders["Content-Type"] = "application/x-www-form-urlencoded";
       const formData = new URLSearchParams();
@@ -37,11 +38,13 @@ export async function apiClient<TInput = any, TOutput = any>(
         method,
         headers: finalHeaders,
         body,
+        withCredentials: true,
       });
     } else {
       res = await axios.post<TOutput>(path, {
         headers: finalHeaders,
         body,
+        withCredentials: true,
       });
     }
 
@@ -54,13 +57,15 @@ export async function apiClient<TInput = any, TOutput = any>(
 
 export async function loginUser(emailOrUsername: string, password: string) {
   return apiClient<
-    { username: string; password: string },
-    { access_token: string; token_type: string }
+    { query: string },
+    { access_token: string; token_type: string; refresh_token: string }
   >(
-    "/api/v1/auth/token",
+    "/api/v1/gql",
     "POST",
-    { username: emailOrUsername, password },
-    "form"
+    {
+      query: AUTH_LOGIN(emailOrUsername, password),
+    },
+    "json"
   );
 }
 

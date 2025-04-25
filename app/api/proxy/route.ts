@@ -18,6 +18,7 @@ export async function POST(request: Request) {
       ...headers,
       "Content-Type": headers["Content-Type"] || "application/json", // Default to JSON if not specified
     },
+    credentials: "include",
   };
 
   if (body) {
@@ -37,9 +38,16 @@ export async function POST(request: Request) {
 
   try {
     const response = await fetch(completeUrl, fetchOptions);
-    const responseBody = await response.json();
-    return NextResponse.json(responseBody, { status: response.status });
+    console.log(response);
+
+    const clonedResponse = new NextResponse(response.body, {
+      status: response.status,
+      statusText: response.statusText,
+      headers: response.headers,
+    });
+    return clonedResponse;
   } catch (error) {
+    console.log(error);
     return NextResponse.json(
       { error: "Proxy request failed", details: String(error) },
       { status: 500 }

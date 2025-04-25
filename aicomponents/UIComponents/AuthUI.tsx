@@ -1,6 +1,6 @@
 // Login.tsx
 "use client";
-import { ReactElement, useState } from "react";
+import { JSX, ReactElement, useEffect, useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useAlert } from "@/components/ui/alert";
@@ -18,7 +18,10 @@ function Login() {
   const handleLogin = async () => {
     try {
       const res = await loginUser(emailOrUsername, password);
+      console.log(res);
       localStorage.setItem("token", res.access_token);
+      localStorage.setItem("refresh_token", res.refresh_token);
+      console.log(res);
 
       addAlert({
         type: "default", // "default", "warning", "success", etc.
@@ -27,6 +30,7 @@ function Login() {
       });
       router.push("/dashboard/agents");
     } catch (err: any) {
+      console.log(err);
       addAlert({
         type: "destructive", // "default", "warning", "success", etc.
         title: "Something went wrong.",
@@ -119,7 +123,6 @@ function SignUp() {
         title: "Something went wrong.",
         description: err.message,
       });
-
     }
   };
 
@@ -220,12 +223,24 @@ function SignUp() {
   );
 }
 
-const AuthProvider = ({ children }: { children: ReactElement }) => {
+const AuthProvider = ({
+  children,
+}: {
+  children: ReactElement | ReactElement[];
+}): ReactElement | null => {
   const router = useRouter();
-  if (!localStorage.getItem("token")) {
-    router.push("/auth/login");
-  }
-  return <>{children}</>;
+  const [mounted, setMounted] = useState<boolean>(false);
+  useEffect(() => {
+    setMounted(true);
+    if (typeof window !== "undefined") {
+      const token = localStorage.getItem("token");
+      if (!token) {
+        router.push("/auth/login");
+      }
+    }
+  }, [router]);
+
+  return mounted ? <>{children}</> : null;
 };
 
 const LogoutProvider = ({ children }: { children: ReactElement }) => {

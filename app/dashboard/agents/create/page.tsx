@@ -1,29 +1,51 @@
 "use client";
 import AppNavbar from "@/aicomponents/UIComponents/app-navbar";
-import ChatUI from "@/aicomponents/PromptAgent/ChatUI";
-
 import EditExperiments from "@/aicomponents/PromptAgent/EditExperiments";
-import Experiments from "@/aicomponents/PromptAgent/experiments";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { apiClient } from "@/lib/api";
-import { BlobUploader } from "@/aicomponents/PromptAgent/BlobHandler";
+import { AxiosHeaders } from "axios";
+import { LIST_AGENTS } from "@/lib/queries";
+import { AuthProvider } from "@/aicomponents/UIComponents/AuthUI";
 
 export default function Home() {
-  const [agentContext, setAgentContext] = useState<AgentContext>();
-  const [agents, setAgents] = useState<AgentContext[]>([]);
-  const [loading, setLoading] = useState<boolean>(false);
-
   return (
     <main className="w-full h-[92vh]">
-      <AppNavbar />
-      <div className="flex w-full h-full">
-        <EditExperiments
-          className=""
-          agentContext={undefined}
-          loading={false}
-          action="create"
-        />
-      </div>
+      <AuthProvider>
+        <AppNavbar />
+        <div
+          onClick={() => {
+            const reqHeaders = new AxiosHeaders();
+            reqHeaders.set("Content-Type", "application/json");
+            reqHeaders.set(
+              "Authorization",
+              "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJvaGZvZUBleGFtcGxlLmNvbSIsImV4cCI6MTc0NTUxOTg2M30.drPVf50OwlHqlyX5O6txau3Yeitcuys96K8jiHfskvc"
+            );
+            apiClient(
+              "/api/v1/gql",
+              "POST",
+
+              {
+                query: LIST_AGENTS(0, "SQL"),
+              },
+              "json",
+              reqHeaders
+            )
+              .then((res) => console.log(res))
+
+              .catch((err) => console.log(err));
+          }}
+        >
+          Button
+        </div>
+        <div className="flex w-full h-full">
+          <EditExperiments
+            className=""
+            agentContext={undefined}
+            loading={false}
+            action="create"
+          />
+        </div>
+      </AuthProvider>
     </main>
   );
 }

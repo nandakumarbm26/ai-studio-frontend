@@ -6,6 +6,7 @@ import EditExperiments from "@/aicomponents/PromptAgent/EditExperiments";
 import Experiments from "@/aicomponents/PromptAgent/experiments";
 import { useEffect, useState } from "react";
 import { apiClient } from "@/lib/api";
+import { AuthProvider } from "@/aicomponents/UIComponents/AuthUI";
 
 export default function Home() {
   const [agentContext, setAgentContext] = useState<AgentContext>();
@@ -34,26 +35,29 @@ export default function Home() {
   }, []);
   return (
     <main className="w-full h-[92vh]">
-      <AppNavbar />
-      <div className="flex w-full h-full">
-        <Experiments
-          setAgentContext={setAgentContext}
-          agents={agents}
-          className="w-1/6"
-        />
+      <AuthProvider>
+        <AppNavbar />
+        <div className="flex w-full h-full">
+          <Experiments
+            setAgentContext={setAgentContext}
+            agents={agents}
+            className="w-1/6"
+          />
 
-        <EditExperiments
-          loading={loading}
-          agentContext={agentContext}
-          className="w-2/6"
-        />
+          <EditExperiments
+            action="edit"
+            loading={loading}
+            agentContext={agentContext}
+            className="w-2/6"
+          />
 
-        <ChatUI
-          loading={loading}
-          agentContext={agentContext}
-          className="w-3/6"
-        />
-      </div>
+          <ChatUI
+            loading={loading}
+            agentContext={agentContext}
+            className="w-3/6"
+          />
+        </div>
+      </AuthProvider>
     </main>
   );
 }

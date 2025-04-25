@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { AlertProvider } from "@/components/ui/alert";
+import { AuthProvider } from "@/aicomponents/UIComponents/AuthUI";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -73,16 +74,18 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <AlertProvider>
-      <html>
-        <body
-          className={`${geistSans.variable} ${geistMono.variable} antialiased `}
-        >
-          <main className="w-[100vw] overflow-x-clip hide-scrollbar">
-            {children}
-          </main>
-        </body>
-      </html>
-    </AlertProvider>
+    <html>
+      <body
+        className={`${geistSans.variable} ${geistMono.variable} antialiased `}
+      >
+        <AlertProvider>
+          <AuthProvider>
+            <main className="w-[100vw] overflow-x-clip hide-scrollbar">
+              {children}
+            </main>
+          </AuthProvider>
+        </AlertProvider>
+      </body>
+    </html>
   );
 }
