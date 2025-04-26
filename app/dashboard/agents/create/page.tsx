@@ -2,9 +2,9 @@
 import AppNavbar from "@/aicomponents/UIComponents/app-navbar";
 import EditExperiments from "@/aicomponents/PromptAgent/EditExperiments";
 import { useEffect } from "react";
-import { apiClient } from "@/lib/api";
+import { apiClient, getCookie } from "@/lib/api";
 import { AxiosHeaders } from "axios";
-import { LIST_AGENTS } from "@/lib/queries";
+import { LIST_AGENTS, REFRESH_TOKEN } from "@/lib/queries";
 import { AuthProvider } from "@/aicomponents/UIComponents/AuthUI";
 
 export default function Home() {
@@ -16,19 +16,15 @@ export default function Home() {
           onClick={() => {
             const reqHeaders = new AxiosHeaders();
             reqHeaders.set("Content-Type", "application/json");
-            reqHeaders.set(
-              "Authorization",
-              "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJvaGZvZUBleGFtcGxlLmNvbSIsImV4cCI6MTc0NTUxOTg2M30.drPVf50OwlHqlyX5O6txau3Yeitcuys96K8jiHfskvc"
-            );
+
             apiClient(
               "/api/v1/gql",
               "POST",
-
               {
-                query: LIST_AGENTS(0, "SQL"),
+                query: REFRESH_TOKEN(),
               },
               "json",
-              reqHeaders
+              true
             )
               .then((res) => console.log(res))
 
@@ -37,14 +33,14 @@ export default function Home() {
         >
           Button
         </div>
-        <div className="flex w-full h-full">
+        {/* <div className="flex w-full h-full">
           <EditExperiments
             className=""
             agentContext={undefined}
             loading={false}
             action="create"
           />
-        </div>
+        </div> */}
       </AuthProvider>
     </main>
   );

@@ -1,20 +1,31 @@
 import axios, { AxiosHeaders, Method } from "axios";
-import { AUTH_LOGIN } from "./queries";
+import { AUTH_LOGIN, AUTH_SIGNUP } from "./queries";
 
 const PROXY_API = "/api/proxy"; // This is your Next.js API route
+
+export function getCookie(name: string) {
+  return document.cookie
+    .split("; ")
+    .find((row) => row.startsWith(name + "="))
+    ?.split("=")[1];
+}
 
 export async function apiClient<TInput = any, TOutput = any>(
   path: string,
   method: Method = "GET",
   data?: TInput,
   contentType: "json" | "form" = "json",
+  withCredentials: boolean = false,
   headers?: AxiosHeaders
 ): Promise<TOutput> {
+  const accessToken = getCookie("access_token") || "";
+
   const finalHeaders: Record<string, string> = {
-    ...(headers || {}),
+    ...headers,
+    Authorization: `Bearer ${accessToken}`,
   };
 
-  let body: any = null;
+  let body: any = undefined;
 
   if (data) {
     if (contentType === "json") {
@@ -26,31 +37,35 @@ export async function apiClient<TInput = any, TOutput = any>(
       Object.entries(data as Record<string, string>).forEach(([key, value]) => {
         formData.append(key, value);
       });
-      body = Object.fromEntries(formData); // Send form data as string
+      body = formData.toString(); // Correct: URL-encoded form as string
     }
   }
 
-  try {
-    let res = undefined;
-    if (path.startsWith("/api/v1")) {
-      res = await axios.post<TOutput>(PROXY_API, {
-        url: path,
-        method,
-        headers: finalHeaders,
-        body,
-        withCredentials: true,
-      });
-    } else {
-      res = await axios.post<TOutput>(path, {
-        headers: finalHeaders,
-        body,
-        withCredentials: true,
-      });
-    }
+  const targetUrl = path.startsWith("/api/v1")
+    ? PROXY_API + "?url=" + path
+    : path;
 
-    return res.data;
-  } catch (err: any) {
-    const message = err.response?.data?.error || err.message || "API Error";
+  const payload = data; // Direct call expects data in body
+  console.log({
+    url: targetUrl,
+    method: method, // Always POST to proxy, but can be actual method internally
+    headers: finalHeaders,
+    withCredentials,
+    data: payload,
+  });
+  try {
+    const response = await axios.request<TOutput>({
+      url: targetUrl,
+      method: method, // Always POST to proxy, but can be actual method internally
+      headers: finalHeaders,
+      withCredentials,
+      data: payload,
+    });
+
+    return response.data;
+  } catch (error: any) {
+    const message =
+      error?.response?.data?.error || error?.message || "API Error";
     throw new Error(message);
   }
 }
@@ -78,7 +93,7 @@ export async function signUpUser(data: {
   password: string;
 }) {
   return apiClient<
-    typeof data,
+    { query: string },
     {
       id: number;
       fname: string;
@@ -86,6 +101,14 @@ export async function signUpUser(data: {
       code: string;
       phone: string;
       email: string;
+      role: string;
     }
-  >("/api/v1/auth/signup", "POST", data, "json");
+  >(
+    "/api/v1/gql",
+    "POST",
+    {
+      query: AUTH_SIGNUP(data),
+    },
+    "json"
+  );
 }

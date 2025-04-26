@@ -4,11 +4,12 @@ import { JSX, ReactElement, useEffect, useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useAlert } from "@/components/ui/alert";
-import { loginUser, signUpUser } from "@/lib/api";
+import { apiClient, getCookie, loginUser, signUpUser } from "@/lib/api";
 import { Label } from "@/components/ui/label";
 import Link from "next/link";
 import { Separator } from "@/components/ui/separator";
 import { useRouter } from "next/navigation";
+import { AUTH_LOGIN, REFRESH_TOKEN } from "@/lib/queries";
 
 function Login() {
   const router = useRouter();
@@ -233,9 +234,18 @@ const AuthProvider = ({
   useEffect(() => {
     setMounted(true);
     if (typeof window !== "undefined") {
-      const token = localStorage.getItem("token");
+      const token = getCookie("access_token");
+      console.log(token, "auth");
       if (!token) {
-        router.push("/auth/login");
+        apiClient(
+          "/api/v1/gql",
+          "POST",
+          {
+            query: REFRESH_TOKEN(),
+          },
+          "json",
+          true
+        ).then((res) => console.log(res));
       }
     }
   }, [router]);
