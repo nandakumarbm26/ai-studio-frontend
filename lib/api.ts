@@ -14,12 +14,10 @@ export async function apiClient<TInput = any, TOutput = any>(
   path: string,
   method: Method = "GET",
   data?: TInput,
-  contentType: "json" | "form" = "json",
   withCredentials: boolean = false,
   headers?: AxiosHeaders
 ): Promise<TOutput> {
   const accessToken = getCookie("access_token") || "";
-  console.log(contentType);
   const finalHeaders: Record<string, string> = {
     ...headers,
     Authorization: `Bearer ${accessToken}`,
@@ -29,17 +27,16 @@ export async function apiClient<TInput = any, TOutput = any>(
     ? PROXY_API + "?url=" + path
     : path;
 
-  const payload = data; // Direct call expects data in body
+  const payload = data;
 
   try {
     const response = await axios.request<TOutput>({
       url: targetUrl,
-      method: method, // Always POST to proxy, but can be actual method internally
+      method: method,
       headers: finalHeaders,
       withCredentials,
       data: payload,
     });
-
     return response.data;
   } catch (error: any) {
     const message =
@@ -52,14 +49,9 @@ export async function loginUser(emailOrUsername: string, password: string) {
   return apiClient<
     { query: string },
     { access_token: string; token_type: string; refresh_token: string }
-  >(
-    "/api/v1/gql",
-    "POST",
-    {
-      query: AUTH_LOGIN(emailOrUsername, password),
-    },
-    "json"
-  );
+  >("/api/v1/gql", "POST", {
+    query: AUTH_LOGIN(emailOrUsername, password),
+  });
 }
 
 export async function refreshToken() {
@@ -69,7 +61,17 @@ export async function refreshToken() {
     {
       query: REFRESH_TOKEN(),
     },
-    "json",
+    true
+  );
+}
+
+export async function logout() {
+  return apiClient<{ query: string }>(
+    "/api/v1/gql",
+    "POST",
+    {
+      query: REFRESH_TOKEN(),
+    },
     true
   );
 }
@@ -93,12 +95,7 @@ export async function signUpUser(data: {
       email: string;
       role: string;
     }
-  >(
-    "/api/v1/gql",
-    "POST",
-    {
-      query: AUTH_SIGNUP(data),
-    },
-    "json"
-  );
+  >("/api/v1/gql", "POST", {
+    query: AUTH_SIGNUP(data),
+  });
 }

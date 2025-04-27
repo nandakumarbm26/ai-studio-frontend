@@ -53,7 +53,7 @@ async function proxyRequest(request: NextRequest) {
       body = text;
     }
   }
-
+  
   const response = await fetch(targetUrl, {
     method: request.method,
     headers,

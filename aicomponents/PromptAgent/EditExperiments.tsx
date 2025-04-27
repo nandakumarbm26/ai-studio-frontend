@@ -20,6 +20,7 @@ import EditExperimentsSkeleton from "./LoadingSkeletons/EditExperimentsSkeleton"
 import { apiClient } from "@/lib/api";
 import { AxiosHeaders } from "axios";
 import { BlobUploader } from "./BlobHandler";
+import { useAlert } from "@/components/ui/alert";
 
 function CreatePromptTrainer({
   index = null,
@@ -30,6 +31,7 @@ function CreatePromptTrainer({
   userPromptTrainers: PromptTrainer[];
   setUserPromptTrainers: Dispatch<SetStateAction<PromptTrainer[]>>;
 }) {
+  const { addAlert } = useAlert();
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
@@ -38,7 +40,11 @@ function CreatePromptTrainer({
     const target = formData.get("target")?.toString().trim() || "";
 
     if (!prompt || !target) {
-      alert("Prompt and Target cannot be empty");
+      addAlert({
+        type: "destructive", // "default", "warning", "success", etc.
+        title: "Warning",
+        description: "Prompt and Target cannot be empty",
+      });
       return;
     }
 
@@ -116,6 +122,7 @@ function EditExperiments({
   const [userPromptTrainers, setUserPromptTrainers] = useState<PromptTrainer[]>(
     []
   );
+  const { addAlert } = useAlert();
   loading;
   const [agentConfiguration, setAgentConfiguration] =
     useState<AgentConfiguration>({
@@ -156,13 +163,18 @@ function EditExperiments({
     });
     if (action == "create") {
       const res = await apiClient(
-        "/api/v1/gql/", // path
+        "/api/v1/gql", // path
         "POST", // method
         body, // data
-        "json", // contentType
         false,
         reqHeaders // headers
-      ).catch((error) => alert("something went wrong!"));
+      ).catch((error) =>
+        addAlert({
+          type: "default", // "default", "warning", "success", etc.
+          title: "Something went wrong",
+          description: error.message,
+        })
+      );
       setAgentConfiguration({
         agentName: res.agentName,
         description: res.description,

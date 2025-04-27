@@ -88,10 +88,9 @@ function ChatUI({
       const reqHeaders = new AxiosHeaders();
       reqHeaders.set("Content-Type", "application/json");
       const data = await apiClient(
-        "/api/v1/gql/",
+        "/api/v1/gql",
         "POST",
-        CHAT_COMPLETIONS([...newChat], { id: agentContext?.id }),
-        "json"
+        CHAT_COMPLETIONS([...newChat], { id: agentContext?.id })
       );
       setChat([
         ...newChat,
@@ -105,8 +104,7 @@ function ChatUI({
           },
         },
       ]);
-    } catch (err) {
-    }
+    } catch (err) {}
     setIsSubmitting(false);
   };
 
