@@ -1,48 +1,72 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 
 const API_URL = process.env.NEXT_PUBLIC_ASTRAPH_AI_API;
 
-export async function POST(request: Request) {
-  const { url, method, headers, body } = await request.json();
+export async function GET(request: NextRequest) {
+  return proxyRequest(request);
+}
 
-  if (!url) {
-    return NextResponse.json({ error: "Missing target URL" }, { status: 400 });
-  }
+export async function POST(request: NextRequest) {
+  return proxyRequest(request);
+}
 
-  const completeUrl = API_URL + url;
+export async function PUT(request: NextRequest) {
+  return proxyRequest(request);
+}
 
-  // Prepare request options
-  const fetchOptions: RequestInit = {
-    method,
-    headers: {
-      ...headers,
-      "Content-Type": headers["Content-Type"] || "application/json", // Default to JSON if not specified
-    },
-  };
+export async function DELETE(request: NextRequest) {
+  return proxyRequest(request);
+}
 
-  if (body) {
-    // If the content is form, serialize it correctly
-    if (headers["Content-Type"] === "application/x-www-form-urlencoded") {
-      // Use URLSearchParams to serialize form data
-      const formData = new URLSearchParams();
-      Object.entries(body as Record<string, string>).forEach(([key, value]) => {
-        formData.append(key, value);
-      });
-      fetchOptions.body = formData.toString(); // Pass serialized string for form data
+async function proxyRequest(request: NextRequest) {
+  const { pathname, searchParams, search } = new URL(
+    request.url,
+    "http://localhost"
+  );
+  const path = searchParams.get("url") || "/";
+  let searchQuery = search.replace("url=" + path, "");
+  searchQuery = searchQuery.length === 1 ? "" : searchQuery;
+
+  const targetUrl = `${API_URL}${path}${pathname.replace(
+    "/api/proxy",
+    ""
+  )}${searchQuery}`;
+
+  const headers = new Headers(request.headers);
+  headers.delete("host"); // Remove host header if exists
+
+  let body: BodyInit | undefined = undefined;
+  if (request.method !== "GET" && request.method !== "HEAD") {
+    const contentType = request.headers.get("content-type") || "";
+
+    if (contentType.includes("application/json")) {
+      const json = await request.json();
+      body = JSON.stringify(json);
+    } else if (contentType.includes("application/x-www-form-urlencoded")) {
+      const text = await request.text();
+      body = text;
+    } else if (contentType.includes("multipart/form-data")) {
+      const formData = await request.formData();
+      body = formData;
     } else {
-      // For JSON data, directly stringify it
-      fetchOptions.body = JSON.stringify(body);
+      const text = await request.text();
+      body = text;
     }
   }
 
-  try {
-    const response = await fetch(completeUrl, fetchOptions);
-    const responseBody = await response.json();
-    return NextResponse.json(responseBody, { status: response.status });
-  } catch (error) {
-    return NextResponse.json(
-      { error: "Proxy request failed", details: String(error) },
-      { status: 500 }
-    );
-  }
+  const response = await fetch(targetUrl, {
+    method: request.method,
+    headers,
+    body,
+    credentials: "include", // Forward cookies if needed
+  });
+
+  const responseBody = await response.arrayBuffer();
+
+  const proxiedResponse = new NextResponse(responseBody, {
+    status: response.status,
+    headers: response.headers,
+  });
+
+  return proxiedResponse;
 }

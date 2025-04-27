@@ -9,6 +9,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { apiClient } from "@/lib/api";
+import { AGENT_BY_ID, LIST_AGENTS } from "@/lib/queries";
 import { ChevronRight } from "lucide-react";
 import { useEffect } from "react";
 
@@ -18,9 +19,11 @@ function Experiments({ className, agents, setAgentContext }: ExperimentsProps) {
   }, []);
   const handleAgentChange = async (id: number) => {
     try {
-      const data = await apiClient(`/api/v1/agents?id=${id}`);
-      if (data?.length) {
-        const chatContext = data[0];
+      const data = await apiClient(`/api/v1/gql`, "POST", AGENT_BY_ID(id));
+      if (data.error || undefined) {
+        alert("No agent found");
+      } else {
+        const chatContext = data.data.agentById;
 
         const trainerPrompts: Message[] = JSON.parse(
           chatContext.trainingPrompts
@@ -31,11 +34,9 @@ function Experiments({ className, agents, setAgentContext }: ExperimentsProps) {
         };
 
         setAgentContext(agentconfig);
-      } else {
-        console.error("No agent found");
       }
     } catch (error) {
-      console.error("Failed to load agent context:", error);
+      alert("Failed to load agent context:");
     }
   };
   return (

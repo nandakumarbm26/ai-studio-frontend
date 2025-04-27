@@ -19,6 +19,7 @@ import { Input } from "@/components/ui/input";
 import EditExperimentsSkeleton from "./LoadingSkeletons/EditExperimentsSkeleton";
 import { apiClient } from "@/lib/api";
 import { AxiosHeaders } from "axios";
+import { BlobUploader } from "./BlobHandler";
 
 function CreatePromptTrainer({
   index = null,
@@ -105,10 +106,12 @@ function EditExperiments({
   className,
   agentContext,
   loading = false,
+  action = "create",
 }: {
   className: string;
   agentContext: AgentContext | undefined;
   loading: boolean;
+  action: "create" | "edit";
 }) {
   const [userPromptTrainers, setUserPromptTrainers] = useState<PromptTrainer[]>(
     []
@@ -116,6 +119,7 @@ function EditExperiments({
   loading;
   const [agentConfiguration, setAgentConfiguration] =
     useState<AgentConfiguration>({
+      id: null,
       behavior: "",
       template: "",
       agentName: "",
@@ -131,6 +135,7 @@ function EditExperiments({
   }
   useEffect(() => {
     setAgentConfiguration({
+      id: agentContext?.id || null,
       behavior: agentContext?.system || "",
       template: agentContext?.responseTemplate || "",
       agentName: agentContext?.agentName || "",
@@ -139,6 +144,34 @@ function EditExperiments({
     setUserPromptTrainers(agentContext?.promptTrainers || []);
   }, [agentContext]);
 
+  const actionHandler = async () => {
+    const reqHeaders = new AxiosHeaders();
+    reqHeaders.set("Content-Type", "application/json");
+    const body = JSON.stringify({
+      agentName: agentConfiguration.agentName,
+      description: agentConfiguration.description,
+      system: agentConfiguration.behavior,
+      responseTemplate: agentConfiguration.template,
+      trainingPrompts: userPromptTrainers,
+    });
+    if (action == "create") {
+      const res = await apiClient(
+        "/api/v1/gql/", // path
+        "POST", // method
+        body, // data
+        "json", // contentType
+        false,
+        reqHeaders // headers
+      ).catch((error) => alert("something went wrong!"));
+      setAgentConfiguration({
+        agentName: res.agentName,
+        description: res.description,
+        behavior: res.system,
+        template: res.responseTemplate,
+      });
+      setUserPromptTrainers([...JSON.parse(res.trainingPrompts)]);
+    }
+  };
   return (
     <Card
       className={
@@ -302,33 +335,18 @@ function EditExperiments({
                   placeholder="[Introduction]\n[Step-by-step Instructions]\n[Additional Notes]"
                 />
               </div>
+              <BlobUploader
+                className="w-full"
+                blobBasePath="agents/rag"
+                title="Knowledge Base Documents"
+                description="Share the knowledge base documents to create RAG agents."
+              />
             </div>
           </CardContent>
           <CardFooter className="flex justify-between">
             <CardAction>
-              <Button
-                onClick={() => {
-                  const reqHeaders = new AxiosHeaders();
-                  reqHeaders.append("Content-Type", "application/json");
-
-                  const body = JSON.stringify({
-                    agentName: agentConfiguration.agentName,
-                    description: agentConfiguration.description,
-                    system: agentConfiguration.behavior,
-                    responseTemplate: agentConfiguration.template,
-                    trainingPrompts: userPromptTrainers,
-                  });
-
-                  apiClient(
-                    "/api/v1/agents", // path
-                    "POST", // method
-                    body, // data
-                    "json", // contentType
-                    reqHeaders // headers
-                  ).catch((error) => console.error(error));
-                }}
-              >
-                Edit
+              <Button className=" capitalize" onClick={actionHandler}>
+                {action}
               </Button>
             </CardAction>
             <div className="text-xs text-right">

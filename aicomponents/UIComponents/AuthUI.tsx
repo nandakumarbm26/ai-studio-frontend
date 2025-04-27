@@ -1,14 +1,22 @@
 // Login.tsx
 "use client";
-import { ReactElement, useState } from "react";
+import { JSX, ReactElement, useEffect, useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useAlert } from "@/components/ui/alert";
-import { loginUser, signUpUser } from "@/lib/api";
+import {
+  apiClient,
+  getCookie,
+  loginUser,
+  refreshToken,
+  signUpUser,
+} from "@/lib/api";
 import { Label } from "@/components/ui/label";
 import Link from "next/link";
 import { Separator } from "@/components/ui/separator";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
+import { AUTH_LOGIN, REFRESH_TOKEN } from "@/lib/queries";
+import { LOGIN_PATH } from "@/lib/const";
 
 function Login() {
   const router = useRouter();
@@ -18,8 +26,6 @@ function Login() {
   const handleLogin = async () => {
     try {
       const res = await loginUser(emailOrUsername, password);
-      localStorage.setItem("token", res.access_token);
-
       addAlert({
         type: "default", // "default", "warning", "success", etc.
         title: "Login Successful",
@@ -119,7 +125,6 @@ function SignUp() {
         title: "Something went wrong.",
         description: err.message,
       });
-
     }
   };
 
@@ -220,13 +225,42 @@ function SignUp() {
   );
 }
 
-const AuthProvider = ({ children }: { children: ReactElement }) => {
+export default function AuthProvider({ children }: AuthProviderProps) {
   const router = useRouter();
-  if (!localStorage.getItem("token")) {
-    router.push("/auth/login");
+  const pathname = usePathname();
+  const [isLoading, setIsLoading] = useState(true); // loading state until auth check
+
+  useEffect(() => {
+    async function checkAuth() {
+      const token = getCookie("access_token");
+
+      if (!token) {
+        try {
+          const res = await refreshToken();
+
+          if (res.errors || !res.data) {
+            if (pathname !== LOGIN_PATH) {
+              router.replace(LOGIN_PATH);
+            }
+          }
+        } catch (err) {
+          if (pathname !== LOGIN_PATH) {
+            router.replace(LOGIN_PATH);
+          }
+        }
+      }
+      setIsLoading(false);
+    }
+
+    checkAuth();
+  }, [router]);
+
+  if (isLoading) {
+    return null; // or a loading spinner if you want
   }
+
   return <>{children}</>;
-};
+}
 
 const LogoutProvider = ({ children }: { children: ReactElement }) => {
   const router = useRouter();
