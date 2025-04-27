@@ -156,12 +156,13 @@ function EditExperiments({
     });
     if (action == "create") {
       const res = await apiClient(
-        "/api/v1/agents", // path
+        "/api/v1/gql/", // path
         "POST", // method
         body, // data
         "json", // contentType
+        false,
         reqHeaders // headers
-      ).catch((error) => console.error(error));
+      ).catch((error) => alert("something went wrong!"));
       setAgentConfiguration({
         agentName: res.agentName,
         description: res.description,

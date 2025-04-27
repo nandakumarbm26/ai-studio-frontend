@@ -11,7 +11,6 @@ export class VercelBlobClient {
     file: File | Blob | Readable,
     contentType?: string
   ) {
-    console.log(filePath);
     return await put(filePath, file, {
       access: "public",
       token: this.token,
@@ -45,7 +44,6 @@ export class VercelBlobClient {
   }
 
   async listBlobs(prefix = "") {
-    console.log(prefix, "prefix");
     return await list({ token: this.token, prefix });
   }
 }

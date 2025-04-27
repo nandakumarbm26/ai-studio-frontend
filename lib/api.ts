@@ -1,5 +1,5 @@
 import axios, { AxiosHeaders, Method } from "axios";
-import { AUTH_LOGIN, AUTH_SIGNUP } from "./queries";
+import { AUTH_LOGIN, AUTH_SIGNUP, REFRESH_TOKEN } from "./queries";
 
 const PROXY_API = "/api/proxy"; // This is your Next.js API route
 
@@ -46,13 +46,7 @@ export async function apiClient<TInput = any, TOutput = any>(
     : path;
 
   const payload = data; // Direct call expects data in body
-  console.log({
-    url: targetUrl,
-    method: method, // Always POST to proxy, but can be actual method internally
-    headers: finalHeaders,
-    withCredentials,
-    data: payload,
-  });
+
   try {
     const response = await axios.request<TOutput>({
       url: targetUrl,
@@ -81,6 +75,18 @@ export async function loginUser(emailOrUsername: string, password: string) {
       query: AUTH_LOGIN(emailOrUsername, password),
     },
     "json"
+  );
+}
+
+export async function refreshToken() {
+  return apiClient<{ query: string }>(
+    "/api/v1/gql",
+    "POST",
+    {
+      query: REFRESH_TOKEN(),
+    },
+    "json",
+    true
   );
 }
 

@@ -1,24 +1,3 @@
-const LIST_AGENTS = (page: number = 1, search: string = ""): string => `
-    query {
-  listAgentsBeta(
-    request: {
-      page: ${page},               # Page number for pagination
-      s: "${search}",              # Search term
-      orderBy: "createdDate" # Ordering the results by createdDate
-    }
-  ) {
-    items {
-      id
-      agentName
-      description
-      system
-      createdDate
-    }
-    hasMore
-    page
-  }
-}`;
-
 const AUTH_LOGIN = (username: string, password: string): string => `
 mutation {
     login(email:"${username}",password:"${password}"){
@@ -66,4 +45,80 @@ function AUTH_SIGNUP(data: {
   `;
 }
 
-export { LIST_AGENTS, AUTH_LOGIN, REFRESH_TOKEN, AUTH_SIGNUP };
+const CHAT_COMPLETIONS = (
+  messages: Message[],
+  filters: { id: number | undefined }
+) => ({
+  query: `
+mutation {
+  openAiCompletion(
+    chatrequest: {
+      messages: ${JSON.stringify(messages)
+        .replace(/"/g, "")
+        .replace(/#/g, '"')},
+      filters: ${JSON.stringify(filters).replace(/"/g, "").replace(/#/g, '"')}
+    }
+  ) {
+    role
+    content
+  }
+}
+`,
+});
+
+const LIST_AGENTS = (
+  page: number = 0,
+  search: string | undefined = undefined,
+  orderBy: string | undefined = undefined
+) => ({
+  query: `
+query {
+  listAgentsBeta(
+    request: {
+      ${page !== undefined ? `page: ${page},` : ""}
+      ${search ? `s: "${search}",` : ""}
+      ${orderBy ? `orderBy: "${orderBy}",` : ""}
+    }
+  ) {
+    items {
+      id
+      agentName
+      description
+      system
+      createdDate
+    }
+    hasMore
+    page
+  }
+}`,
+});
+
+const AGENT_BY_ID = (id: number) => ({
+  query: `
+query {
+  agentById(
+    request: {
+      id : ${id}
+    }
+  ) {
+    id
+    agentName
+    description
+    system
+    createdDate
+    responseTemplate
+    trainingPrompts
+    createdDate
+    updatedDate  
+  }
+}`,
+});
+
+export {
+  AUTH_LOGIN,
+  REFRESH_TOKEN,
+  AUTH_SIGNUP,
+  CHAT_COMPLETIONS,
+  LIST_AGENTS,
+  AGENT_BY_ID,
+};

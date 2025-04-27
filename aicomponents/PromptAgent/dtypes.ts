@@ -26,7 +26,16 @@ interface AgentContext {
   agentName: string;
   description: string;
 }
-type Message = { role: "user" | "assistant"; content: string };
+
+type Content = {
+  type: "TEXT" | "IMAGE_URL";
+  text?: string;
+  imageUrl?: string;
+};
+type Message = {
+  role: "USER" | "ASSISTANT" | "SYSTEM";
+  content: string | { text?: Content; image?: Content };
+};
 
 type ExperimentsProps = {
   className: string;

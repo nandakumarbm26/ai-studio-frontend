@@ -9,7 +9,6 @@ export async function GET(req: NextRequest) {
 
 export async function POST(req: NextRequest) {
   const contentType = req.headers.get("content-type");
-  console.log(JSON.stringify(req));
   // --- UPLOAD ---
   if (contentType?.includes("multipart/form-data")) {
     const form = await req.formData();
@@ -26,7 +25,6 @@ export async function POST(req: NextRequest) {
       );
       return NextResponse.json(blob);
     } catch (err) {
-      console.log(err);
       return NextResponse.json(
         { error: "Failed to upload file" },
         { status: 500 }
@@ -37,15 +35,12 @@ export async function POST(req: NextRequest) {
   // --- JSON Requests ---
   const body = await req.json();
   const { action, blobBasePath } = body;
-  console.log({ action, blobBasePath });
   // --- LIST ---
   if (action === "list" && blobBasePath) {
     try {
       const blobs = await blobClient.listBlobs(blobBasePath);
-      console.log(blobs);
       return NextResponse.json({ blobs });
     } catch (err) {
-      console.log(err);
 
       return NextResponse.json(
         { error: "Failed to list blobs" },
@@ -64,7 +59,6 @@ export async function POST(req: NextRequest) {
       const result = await blobClient.deleteBlob(url);
       return NextResponse.json(result);
     } catch (err) {
-      console.log(err);
 
       return NextResponse.json(
         { error: "Failed to delete blob" },

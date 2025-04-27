@@ -4,12 +4,19 @@ import { JSX, ReactElement, useEffect, useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useAlert } from "@/components/ui/alert";
-import { apiClient, getCookie, loginUser, signUpUser } from "@/lib/api";
+import {
+  apiClient,
+  getCookie,
+  loginUser,
+  refreshToken,
+  signUpUser,
+} from "@/lib/api";
 import { Label } from "@/components/ui/label";
 import Link from "next/link";
 import { Separator } from "@/components/ui/separator";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { AUTH_LOGIN, REFRESH_TOKEN } from "@/lib/queries";
+import { LOGIN_PATH } from "@/lib/const";
 
 function Login() {
   const router = useRouter();
@@ -19,11 +26,6 @@ function Login() {
   const handleLogin = async () => {
     try {
       const res = await loginUser(emailOrUsername, password);
-      console.log(res);
-      localStorage.setItem("token", res.access_token);
-      localStorage.setItem("refresh_token", res.refresh_token);
-      console.log(res);
-
       addAlert({
         type: "default", // "default", "warning", "success", etc.
         title: "Login Successful",
@@ -31,7 +33,6 @@ function Login() {
       });
       router.push("/dashboard/agents");
     } catch (err: any) {
-      console.log(err);
       addAlert({
         type: "destructive", // "default", "warning", "success", etc.
         title: "Something went wrong.",
@@ -224,34 +225,42 @@ function SignUp() {
   );
 }
 
-const AuthProvider = ({
-  children,
-}: {
-  children: ReactElement | ReactElement[];
-}): ReactElement | null => {
+export default function AuthProvider({ children }: AuthProviderProps) {
   const router = useRouter();
-  const [mounted, setMounted] = useState<boolean>(false);
+  const pathname = usePathname();
+  const [isLoading, setIsLoading] = useState(true); // loading state until auth check
+
   useEffect(() => {
-    setMounted(true);
-    if (typeof window !== "undefined") {
+    async function checkAuth() {
       const token = getCookie("access_token");
-      console.log(token, "auth");
+
       if (!token) {
-        apiClient(
-          "/api/v1/gql",
-          "POST",
-          {
-            query: REFRESH_TOKEN(),
-          },
-          "json",
-          true
-        ).then((res) => console.log(res));
+        try {
+          const res = await refreshToken();
+
+          if (res.errors || !res.data) {
+            if (pathname !== LOGIN_PATH) {
+              router.replace(LOGIN_PATH);
+            }
+          }
+        } catch (err) {
+          if (pathname !== LOGIN_PATH) {
+            router.replace(LOGIN_PATH);
+          }
+        }
       }
+      setIsLoading(false);
     }
+
+    checkAuth();
   }, [router]);
 
-  return mounted ? <>{children}</> : null;
-};
+  if (isLoading) {
+    return null; // or a loading spinner if you want
+  }
+
+  return <>{children}</>;
+}
 
 const LogoutProvider = ({ children }: { children: ReactElement }) => {
   const router = useRouter();

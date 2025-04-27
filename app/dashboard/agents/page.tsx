@@ -7,6 +7,7 @@ import Experiments from "@/aicomponents/PromptAgent/experiments";
 import { useEffect, useState } from "react";
 import { apiClient } from "@/lib/api";
 import { AuthProvider } from "@/aicomponents/UIComponents/AuthUI";
+import { LIST_AGENTS } from "@/lib/queries";
 
 export default function Home() {
   const [agentContext, setAgentContext] = useState<AgentContext>();
@@ -18,15 +19,17 @@ export default function Home() {
       setLoading(true);
       try {
         const data = await apiClient(
-          `/api/v1/agents?s=id,agentName,description,updatedDate`
+          `/api/v1/gql/`,
+          "POST",
+          LIST_AGENTS(0, "", "createdDate")
         );
-        if (data?.length) {
-          setAgents(data);
+        if (data.data.listAgentsBeta.items?.length) {
+          setAgents(data.data.listAgentsBeta.items);
         } else {
-          console.error("No agents found");
+          alert("No agents found");
         }
       } catch (error) {
-        console.error("Failed to load agent context:", error);
+        alert("Failed to load agent context:");
       }
       setLoading(false);
     };

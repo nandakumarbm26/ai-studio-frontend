@@ -17,6 +17,7 @@ import remarkGfm from "remark-gfm";
 import { Skeleton } from "@/components/ui/skeleton";
 import { apiClient } from "@/lib/api";
 import { AxiosHeaders } from "axios";
+import { CHAT_COMPLETIONS } from "@/lib/queries";
 
 function ChatUISkeleton() {
   return (
@@ -27,7 +28,7 @@ function ChatUISkeleton() {
         <Skeleton className="h-4 w-[180px]" />
       </div>
 
-      {/* User Message */}
+      {/* USER Message */}
       <div className="self-end bg-blue-100 p-3 rounded-xl max-w-[80%]">
         <Skeleton className="h-4 w-[200px]" />
       </div>
@@ -52,7 +53,12 @@ function ChatUI({
   loading: boolean;
 }) {
   const [chat, setChat] = useState<Message[]>([
-    { role: "assistant", content: "Hello, How can I help you Today" },
+    {
+      role: "ASSISTANT",
+      content: {
+        text: { type: "TEXT", text: "#Hello, How can I help you Today#" },
+      },
+    },
   ]);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -69,27 +75,37 @@ function ChatUI({
 
     if (!prompt?.trim()) return;
 
-    const newChat: Message[] = [...chat, { role: "user", content: prompt }];
+    const newChat: Message[] = [
+      ...chat,
+      {
+        role: "USER",
+        content: { text: { type: "TEXT", text: `#${prompt}#` } },
+      },
+    ];
 
     e.currentTarget.reset(); // Clear input
     try {
       const reqHeaders = new AxiosHeaders();
       reqHeaders.set("Content-Type", "application/json");
       const data = await apiClient(
-        "/api/v1/chat/",
+        "/api/v1/gql/",
         "POST",
-
-        {
-          messages: [...newChat],
-          filters: { id: agentContext?.id },
-        },
-        "json",
-        reqHeaders
+        CHAT_COMPLETIONS([...newChat], { id: agentContext?.id }),
+        "json"
       );
-
-      setChat([...newChat, { role: "assistant", content: data.response }]);
+      setChat([
+        ...newChat,
+        {
+          role: "ASSISTANT",
+          content: {
+            text: {
+              type: "TEXT",
+              text: `#${data.data.openAiCompletion.content}#`,
+            },
+          },
+        },
+      ]);
     } catch (err) {
-      console.error("Chat request failed:", err);
     }
     setIsSubmitting(false);
   };
@@ -117,12 +133,17 @@ function ChatUI({
                 <div
                   key={i}
                   className={`border-2 rounded-xl px-4 py-1 max-w-[80%] break-words ${
-                    msg.role === "user"
+                    msg.role === "USER"
                       ? "self-end bg-blue-100"
                       : "self-start bg-gray-200"
                   }`}
                 >
-                  <Markdown remarkPlugins={[remarkGfm]}>{msg.content}</Markdown>
+                  <Markdown remarkPlugins={[remarkGfm]}>
+                    {typeof msg.content == "string"
+                      ? msg.content
+                      : (msg?.content?.text?.text || "").replace(/#/g, "") ||
+                        ""}
+                  </Markdown>
                 </div>
               ))}
             </div>

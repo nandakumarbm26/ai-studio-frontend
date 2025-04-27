@@ -12,27 +12,7 @@ export default function Home() {
     <main className="w-full h-[92vh]">
       <AuthProvider>
         <AppNavbar />
-        <div
-          onClick={() => {
-            const reqHeaders = new AxiosHeaders();
-            reqHeaders.set("Content-Type", "application/json");
 
-            apiClient(
-              "/api/v1/gql",
-              "POST",
-              {
-                query: REFRESH_TOKEN(),
-              },
-              "json",
-              true
-            )
-              .then((res) => console.log(res))
-
-              .catch((err) => console.log(err));
-          }}
-        >
-          Button
-        </div>
         {/* <div className="flex w-full h-full">
           <EditExperiments
             className=""

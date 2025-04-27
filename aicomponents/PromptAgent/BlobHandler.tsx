@@ -37,9 +37,7 @@ export function BlobUploader({
       method: "POST",
       body: JSON.stringify({ action: "list", blobBasePath }),
     });
-    console.log(res);
     const data = await res.json();
-    console.log(data);
     setFiles(data.blobs.blobs);
   };
 
@@ -56,7 +54,6 @@ export function BlobUploader({
       method: "POST",
       body: formData,
     });
-    console.log(await res.json());
     if (res.ok) {
       fetchFiles();
     }

@@ -19,7 +19,6 @@ export async function DELETE(request: NextRequest) {
 }
 
 async function proxyRequest(request: NextRequest) {
-  const query = new URLSearchParams(request.url);
   const { pathname, searchParams, search } = new URL(
     request.url,
     "http://localhost"
@@ -36,11 +35,25 @@ async function proxyRequest(request: NextRequest) {
   const headers = new Headers(request.headers);
   headers.delete("host"); // Remove host header if exists
 
-  const body =
-    request.method !== "GET" && request.method !== "HEAD"
-      ? await request.clone().arrayBuffer()
-      : undefined;
+  let body: BodyInit | undefined = undefined;
+  if (request.method !== "GET" && request.method !== "HEAD") {
+    const contentType = request.headers.get("content-type") || "";
 
+    if (contentType.includes("application/json")) {
+      const json = await request.json();
+      body = JSON.stringify(json);
+    } else if (contentType.includes("application/x-www-form-urlencoded")) {
+      const text = await request.text();
+      body = text;
+    } else if (contentType.includes("multipart/form-data")) {
+      const formData = await request.formData();
+      body = formData;
+    } else {
+      const text = await request.text();
+      body = text;
+    }
+  }
+ 
   const response = await fetch(targetUrl, {
     method: request.method,
     headers,
