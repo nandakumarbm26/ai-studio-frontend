@@ -15,8 +15,8 @@ import { Label } from "@/components/ui/label";
 import Link from "next/link";
 import { Separator } from "@/components/ui/separator";
 import { usePathname, useRouter } from "next/navigation";
-import { AUTH_LOGIN, REFRESH_TOKEN } from "@/lib/queries";
-import { LOGIN_PATH } from "@/lib/const";
+import { AUTH_LOGIN, AUTH_LOGOUT, REFRESH_TOKEN } from "@/lib/queries";
+import { GRAPHQL_PATH, LOGIN_PATH } from "@/lib/const";
 
 function Login() {
   const router = useRouter();
@@ -264,11 +264,29 @@ export default function AuthProvider({ children }: AuthProviderProps) {
 
 const LogoutProvider = ({ children }: { children: ReactElement }) => {
   const router = useRouter();
+  const { addAlert } = useAlert();
   return (
     <div
       onClick={() => {
-        localStorage.removeItem("token");
-        router.push("/auth/login");
+        apiClient(GRAPHQL_PATH, "POST", AUTH_LOGOUT())
+          .then((res) => {
+            if (res.error) {
+              throw "GraphQL error";
+            }
+            addAlert({
+              type: "default", // "default", "warning", "success", etc.
+              title: "Logged Out successfully!",
+              description: "",
+            });
+            router.push("/auth/login");
+          })
+          .catch((err) => {
+            addAlert({
+              type: "destructive", // "default", "warning", "success", etc.
+              title: "Something went wrong",
+              description: "",
+            });
+          });
       }}
     >
       {children}

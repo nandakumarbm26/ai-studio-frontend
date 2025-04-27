@@ -8,28 +8,37 @@ import { useEffect, useState } from "react";
 import { apiClient } from "@/lib/api";
 import { AuthProvider } from "@/aicomponents/UIComponents/AuthUI";
 import { LIST_AGENTS } from "@/lib/queries";
+import { useAlert } from "@/components/ui/alert";
 
 export default function Home() {
   const [agentContext, setAgentContext] = useState<AgentContext>();
   const [agents, setAgents] = useState<AgentContext[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
-
+  const { addAlert } = useAlert();
   useEffect(() => {
     const initChat = async () => {
       setLoading(true);
       try {
         const data = await apiClient(
-          `/api/v1/gql/`,
+          `/api/v1/gql`,
           "POST",
           LIST_AGENTS(0, "", "createdDate")
         );
         if (data.data.listAgentsBeta.items?.length) {
           setAgents(data.data.listAgentsBeta.items);
         } else {
-          alert("No agents found");
+          addAlert({
+            type: "destructive", // "default", "warning", "success", etc.
+            title: "No agent found",
+            description: "",
+          });
         }
       } catch {
-        alert("Failed to load agent context:");
+        addAlert({
+          type: "destructive", // "default", "warning", "success", etc.
+          title: "Failed to load agent context:",
+          description: "",
+        });
       }
       setLoading(false);
     };

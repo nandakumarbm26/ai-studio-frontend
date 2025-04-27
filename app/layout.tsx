@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { AlertProvider } from "@/components/ui/alert";
-import { AuthProvider } from "@/aicomponents/UIComponents/AuthUI";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -79,11 +78,9 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased `}
       >
         <AlertProvider>
-          <AuthProvider>
-            <main className="w-[100vw] overflow-x-clip hide-scrollbar">
-              {children}
-            </main>
-          </AuthProvider>
+          <main className="w-[100vw] overflow-x-clip hide-scrollbar">
+            {children}
+          </main>
         </AlertProvider>
       </body>
     </html>

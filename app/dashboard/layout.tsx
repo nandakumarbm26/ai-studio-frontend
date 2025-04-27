@@ -2,8 +2,7 @@ import type { Metadata } from "next";
 import "../globals.css";
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/aicomponents/UIComponents/app-sidebar";
-
-
+import { AuthProvider } from "@/aicomponents/UIComponents/AuthUI";
 
 export const metadata: Metadata = {
   title: "Create Next App",
@@ -17,10 +16,12 @@ export default function RootLayout({
 }>) {
   return (
     <div className="w-[100vw]">
-      <SidebarProvider>
-        <AppSidebar />
-        {children}
-      </SidebarProvider>
+      <AuthProvider>
+        <SidebarProvider>
+          <AppSidebar />
+          {children}
+        </SidebarProvider>
+      </AuthProvider>
     </div>
   );
 }

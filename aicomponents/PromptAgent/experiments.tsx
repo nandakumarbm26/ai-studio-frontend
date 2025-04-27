@@ -1,3 +1,4 @@
+import { useAlert } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -17,11 +18,16 @@ function Experiments({ className, agents, setAgentContext }: ExperimentsProps) {
   useEffect(() => {
     handleAgentChange(1);
   }, []);
+  const { addAlert } = useAlert();
   const handleAgentChange = async (id: number) => {
     try {
       const data = await apiClient(`/api/v1/gql`, "POST", AGENT_BY_ID(id));
       if (data.error || undefined) {
-        alert("No agent found");
+        addAlert({
+          type: "destructive", // "default", "warning", "success", etc.
+          title: "No agent found",
+          description: "",
+        });
       } else {
         const chatContext = data.data.agentById;
 
@@ -36,7 +42,11 @@ function Experiments({ className, agents, setAgentContext }: ExperimentsProps) {
         setAgentContext(agentconfig);
       }
     } catch (error) {
-      alert("Failed to load agent context:");
+      addAlert({
+        type: "destructive", // "default", "warning", "success", etc.
+        title: "Failed to load agent context:",
+        description: "",
+      });
     }
   };
   return (

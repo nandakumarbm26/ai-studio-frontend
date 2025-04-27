@@ -66,6 +66,15 @@ mutation {
 `,
 });
 
+const AUTH_LOGOUT = () => ({
+  query: `
+mutation {
+  logout {
+    message
+    error
+  }
+}`,
+});
 const LIST_AGENTS = (
   page: number = 0,
   search: string | undefined = undefined,
@@ -121,4 +130,5 @@ export {
   CHAT_COMPLETIONS,
   LIST_AGENTS,
   AGENT_BY_ID,
+  AUTH_LOGOUT,
 };
