@@ -28,7 +28,7 @@ export default function Home() {
         } else {
           alert("No agents found");
         }
-      } catch (error) {
+      } catch {
         alert("Failed to load agent context:");
       }
       setLoading(false);

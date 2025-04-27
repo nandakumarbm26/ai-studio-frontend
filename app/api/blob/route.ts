@@ -24,7 +24,7 @@ export async function POST(req: NextRequest) {
         file
       );
       return NextResponse.json(blob);
-    } catch (err) {
+    } catch {
       return NextResponse.json(
         { error: "Failed to upload file" },
         { status: 500 }
@@ -40,8 +40,7 @@ export async function POST(req: NextRequest) {
     try {
       const blobs = await blobClient.listBlobs(blobBasePath);
       return NextResponse.json({ blobs });
-    } catch (err) {
-
+    } catch {
       return NextResponse.json(
         { error: "Failed to list blobs" },
         { status: 500 }
@@ -58,8 +57,7 @@ export async function POST(req: NextRequest) {
     try {
       const result = await blobClient.deleteBlob(url);
       return NextResponse.json(result);
-    } catch (err) {
-
+    } catch {
       return NextResponse.json(
         { error: "Failed to delete blob" },
         { status: 500 }

@@ -25,22 +25,6 @@ export async function apiClient<TInput = any, TOutput = any>(
     Authorization: `Bearer ${accessToken}`,
   };
 
-  let body: any = undefined;
-
-  if (data) {
-    if (contentType === "json") {
-      finalHeaders["Content-Type"] = "application/json";
-      body = JSON.stringify(data);
-    } else if (contentType === "form") {
-      finalHeaders["Content-Type"] = "application/x-www-form-urlencoded";
-      const formData = new URLSearchParams();
-      Object.entries(data as Record<string, string>).forEach(([key, value]) => {
-        formData.append(key, value);
-      });
-      body = formData.toString(); // Correct: URL-encoded form as string
-    }
-  }
-
   const targetUrl = path.startsWith("/api/v1")
     ? PROXY_API + "?url=" + path
     : path;
