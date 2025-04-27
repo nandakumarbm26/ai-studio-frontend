@@ -19,7 +19,7 @@ export async function apiClient<TInput = any, TOutput = any>(
   headers?: AxiosHeaders
 ): Promise<TOutput> {
   const accessToken = getCookie("access_token") || "";
-
+  console.log(contentType);
   const finalHeaders: Record<string, string> = {
     ...headers,
     Authorization: `Bearer ${accessToken}`,

@@ -3,7 +3,7 @@ import { VercelBlobClient } from "@/lib/blob";
 
 const blobClient = new VercelBlobClient();
 
-export async function GET(req: NextRequest) {
+export async function GET() {
   return NextResponse.json({ message: "hello" });
 }
 
